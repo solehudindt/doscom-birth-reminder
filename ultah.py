@@ -6,9 +6,9 @@ import time
 import logging
 import csv
 
-with open('pengurus.csv', newline='') as f:
+with open('dummy.csv', newline='') as f:
 		reader = csv.reader(f)
-		data = list(reader)
+		births = list(reader)
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -19,21 +19,22 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 # update. Error handlers also receive the raised TelegramError object in error.
 logger = logging.getLogger(__name__)
 
-births = [['21/09', 'Soldev'], ['06/05', 'Dummy'], ['10/04', 'Duny']]
-
+# births = [['21/09', 'Soldev'], ['06/05', 'Dummy'], ['10/04', 'Duny']]
 
 def start(update, context):
     """Send a message when the command /start is issued."""
     chat_id = update.message.chat_id
-    update.message.reply_text('Hello guys!! \nAku doscom birthday reminder, aku bakal ngingetin ulang tahun setiap anggota doscom ^_-')
+    update.message.reply_text("""Hello guys!!
+    	Aku doscom birthday reminder, aku bakal ngingetin ulang tahun setiap anggota doscom ^_-
+    """)
 
-    job = context.job_queue.run_daily(cek_birth, time=ttime(18,53), context=chat_id, name=None)
+    job = context.job_queue.run_daily(cek_birth, time=time(18,53), context=chat_id, name=None)
 
 
 def cek_birth(context):
 	job = context.job
 	for x in births:
-		today = time.strftime('%d/%m')
+		today = time.strftime('%m-%d')
 		line = 'Belum ada yang ulang tahun hari ini'
 
 		if today in x[0]:
@@ -45,7 +46,7 @@ def cek_birth(context):
 def help(update, context):
     """Send a message when the command /help is issued."""
     update.message.reply_text("""Halo, kalian bisa bantu bot ini biar lebih pinter
-    	di github.com/doscom-birth-reminder
+    	di github.com/solehudindt/doscom-birth-reminder
     """)
 
 
