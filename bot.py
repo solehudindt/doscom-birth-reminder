@@ -2,7 +2,8 @@ import os
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
                         ConversationHandler)
-# from datetime import date, datetime
+import datetime
+from tzlocal import get_localzone
 import time
 import logging
 import csv
@@ -30,28 +31,32 @@ def start(update, context):
     """Send a message when the command /start is issued."""
     chat_id = update.message.chat_id
     update.message.reply_text("""Hello guys!!
-    	Aku doscom birthday reminder, aku bakal ngingetin ulang tahun setiap anggota doscom ^_-
+    Aku doscom birthday reminder, aku bakal ngingetin ulang tahun setiap anggota doscom ^_-
     """)
+    waktu = datetime.time(21,16, tzinfo=get_localzone())
 
-    job = context.job_queue.run_daily(cek_birth, time=time(18,53), context=chat_id, name=None)
+    job = context.job_queue.run_daily(cek_birth, time=waktu, context=chat_id, name=None)
 
 
 def cek_birth(context):
-	job = context.job
-	for x in births:
-		today = time.strftime('%m-%d')
-		line = 'Belum ada yang ulang tahun hari ini'
+    job = context.job
+    logger.info('calling cek_birth')
+    for x in births:
+        today = time.strftime('%m-%d')
 
-		if today in x[0]:
-			line = 'Selamat ulang tahun ^_^ ' + x[1]
-			break
-	
-	context.bot.send_message(job.context, text=line)
+        if today in x[0]:
+            line = 'Selamat ulang tahun ^_^ ' + x[1]
+            break
+        else:
+            line = 'Belum ada yang ulang tahun hari ini'
+            break
+            
+    context.bot.send_message(job.context, text=line)
 
 def help(update, context):
     """Send a message when the command /help is issued."""
     update.message.reply_text("""Halo, kalian bisa bantu bot ini biar lebih pinter
-    	di github.com/solehudindt/doscom-birth-reminder
+    di github.com/solehudindt/doscom-birth-reminder
     """)
 
 

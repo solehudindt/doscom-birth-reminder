@@ -1,13 +1,11 @@
-import os
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
                         ConversationHandler)
-# from datetime import date, datetime
-import time
+import datetime
+from tzlocal import get_localzone
+import time as taim
 import logging
 import csv
-
-PORT = int(os.environ.get('PORT', 5000))
 
 with open('dummy.csv', newline='') as f:
 		reader = csv.reader(f)
@@ -21,32 +19,31 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 logger = logging.getLogger(__name__)
-# TOKEN = 'TELEGRAMBOTTOKEN'
-TOKEN = '1129684557:AAHoIF6g-t6c5G9YTK-9TmrxMWK6P8W837E'
 
 # births = [['21/09', 'Soldev'], ['06/05', 'Dummy'], ['10/04', 'Duny']]
 
 def start(update, context):
     """Send a message when the command /start is issued."""
     chat_id = update.message.chat_id
-    update.message.reply_text("""Hello guys!!
-    	Aku doscom birthday reminder, aku bakal ngingetin ulang tahun setiap anggota doscom ^_-
+    update.message.reply_text("""some texts ^_-
     """)
+    logger.info("starting")
+    waktu = datetime.time(21,10, tzinfo=get_localzone())
 
-    job = context.job_queue.run_daily(cek_birth, time=time(18,53), context=chat_id, name=None)
+    job = context.job_queue.run_daily(cek_birth, time=waktu, context=chat_id, name=None)
 
 
 def cek_birth(context):
-	job = context.job
-	for x in births:
-		today = time.strftime('%m-%d')
-		line = 'Belum ada yang ulang tahun hari ini'
-
-		if today in x[0]:
-			line = 'Selamat ulang tahun ^_^ ' + x[1]
-			break
+    job = context.job
+    logger.info('cek birth dipanggil')
+    for x in births:
+        today = taim.strftime('%m-%d')
+        line = 'Belum ada yang ulang tahun hari ini'
+        
+        if today in x[0]:
+            line = 'Selamat ulang tahun ^_^ ' + x[1]
 	
-	context.bot.send_message(job.context, text=line)
+    context.bot.send_message(job.context, text=line)
 
 def help(update, context):
     """Send a message when the command /help is issued."""
@@ -65,7 +62,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater('1129684557:AAHoIF6g-t6c5G9YTK-9TmrxMWK6P8W837E', use_context=True)
+    updater = Updater("1129684557:AAHoIF6g-t6c5G9YTK-9TmrxMWK6P8W837E", use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -75,13 +72,9 @@ def main():
     dp.add_handler(CommandHandler("help", help))
 
     # log all errors
-    dp.add_error_handler(error)
+    # dp.add_error_handler(error)
 
     # Start the Bot
-    # updater.start_webhook(listen="0.0.0.0",
-    #                         port=int(PORT),
-    #                         url_path=TOKEN)
-    # updater.bot.setWebhook('https://herokuname.herokuapp.com/' + TOKEN)
     updater.start_polling()
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
