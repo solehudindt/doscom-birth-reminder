@@ -23,16 +23,16 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 # update. Error handlers also receive the raised TelegramError object in error.
 logger = logging.getLogger(__name__)
 # TOKEN = 'TELEGRAMBOTTOKEN'
-TOKEN = '1129684557:AAHoIF6g-t6c5G9YTK-9TmrxMWK6P8W837E'
 
 # births = [['21/09', 'Soldev'], ['06/05', 'Dummy'], ['10/04', 'Duny']]
 
 def start(update, context):
     """Send a message when the command /start is issued."""
     chat_id = update.message.chat_id
-    update.message.reply_text("""Hello guys!!
-    Aku doscom birthday reminder, aku bakal ngingetin ulang tahun setiap anggota doscom ^_-
-    """)
+    update.message.reply_text(
+        """Hello guys!!
+        Aku doscom birthday reminder, aku bakal ngingetin ulang tahun setiap anggota doscom ^_-
+        """)
     waktu = datetime.time(21,16, tzinfo=get_localzone())
 
     job = context.job_queue.run_daily(cek_birth, time=waktu, context=chat_id, name=None)
@@ -43,12 +43,14 @@ def cek_birth(context):
     logger.info('calling cek_birth')
     for x in births:
         today = time.strftime('%m-%d')
+        berulang_tahun = []
 
         if today in x[0]:
             line = 'Selamat ulang tahun ^_^ ' + x[1]
+            # berulang_tahun.append(x[1])
             break
         else:
-            line = 'Belum ada yang ulang tahun hari ini'
+            line = 'Belum ada anggota doscom yang ulang tahun hari ini ¯\\_(ツ)_/¯'
             break
             
     context.bot.send_message(job.context, text=line)
@@ -70,7 +72,7 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater('1129684557:AAHoIF6g-t6c5G9YTK-9TmrxMWK6P8W837E', use_context=True)
+    updater = Updater(TOKEN, use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
