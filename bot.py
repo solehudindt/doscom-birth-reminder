@@ -2,17 +2,15 @@ import os
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler,
                         ConversationHandler)
+from models import create_connection, select_all_tasks
 import datetime
 from tzlocal import get_localzone
+import pytz
 import time
 import logging
 import csv
 
 PORT = int(os.environ.get('PORT', 5000))
-
-with open('dummy.csv', newline='') as f:
-		reader = csv.reader(f)
-		births = list(reader)
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -22,38 +20,38 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 logger = logging.getLogger(__name__)
-# TOKEN = 'TELEGRAMBOTTOKEN'
-
+TOKEN = 'TELEGRAMBOTTOKEN'
+conn = create_connection()
+data = select_all_tasks(conn)
 # births = [['21/09', 'Soldev'], ['06/05', 'Dummy'], ['10/04', 'Duny']]
 
 def start(update, context):
     """Send a message when the command /start is issued."""
     chat_id = update.message.chat_id
     update.message.reply_text(
-        """Hello guys!!
-        Aku doscom birthday reminder, aku bakal ngingetin ulang tahun setiap anggota doscom ^_-
-        """)
-    waktu = datetime.time(21,16, tzinfo=get_localzone())
-
+    """ 
+    Hello guys!!
+    Aku doscom birthday reminder, aku bakal ngingetin ulang tahun setiap anggota doscom ^_-
+    """)
+    jakarta = pytz.timezone('Asia/Jakarta')
+    waktu = datetime.time(7,5, tzinfo=jakarta)
+    print(waktu)
     job = context.job_queue.run_daily(cek_birth, time=waktu, context=chat_id, name=None)
 
 
 def cek_birth(context):
     job = context.job
     logger.info('calling cek_birth')
-    for x in births:
-        today = time.strftime('%m-%d')
-        berulang_tahun = []
-
-        if today in x[0]:
-            line = 'Selamat ulang tahun ^_^ ' + x[1]
-            # berulang_tahun.append(x[1])
-            break
-        else:
-            line = 'Belum ada anggota doscom yang ulang tahun hari ini ¯\\_(ツ)_/¯'
-            break
+    today = taim.strftime('%m-%d')
+    berulang = [x[1] for x in data if today in x]
+    if berulang:
+        line = r'Wah... Hari ini ada yang ulang tahun nih Selamat ulang tahun ya '
+        line += ', '.join(berulang)
+    else:
+        line = 'Belum ada yang berulang'     
             
     context.bot.send_message(job.context, text=line)
+    berulang.clear()
 
 def help(update, context):
     """Send a message when the command /help is issued."""
